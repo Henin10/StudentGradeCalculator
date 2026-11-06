@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Student Grade Calculator Management System</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .register-wrapper {
+            width: 100%;
+            max-width: 540px;
+            margin-top: 30px;
+            margin-bottom: 40px;
+        }
+
+        .brand-icon-large {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 12px;
+            background: #f0f2fe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.2);
+        }
+
+        .brand-icon-large svg {
+            width: 34px;
+            height: 34px;
+            fill: currentColor;
+        }
+
+        .toggle-password-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #888888;
+        }
+
+        .input-relative {
+            position: relative;
+        }
+
+        .input-relative input {
+            padding-right: 44px;
+        }
+
+        .password-hint {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="register-wrapper">
+
+        <div class="card">
+
+            <!-- BRAND HEADER -->
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div class="brand-icon-large">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                </div>
+                <h1 style="font-size: 24px; color: #2d3748; margin-bottom: 6px;">Create Account</h1>
+                <p style="font-size: 14px; color: #718096;">Phase 4: Server-Side Student Registration</p>
+            </div>
+
+            <h2 class="section-accent-title">Student Registration</h2>
+
+            <!-- ALERT MESSAGE -->
+            <div id="alertBox" class="alert"></div>
+
+            <!-- REGISTRATION FORM -->
+            <form id="registerForm" action="register" method="POST" onsubmit="handleRegisterSubmit(event)">
+
+                <div class="form-group">
+                    <label for="studentName">Full Name *</label>
+                    <input
+                        type="text"
+                        id="studentName"
+                        name="studentName"
+                        placeholder="e.g. Ananya Patel"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="studentId">Student ID *</label>
+                    <input
+                        type="text"
+                        id="studentId"
+                        name="studentId"
+                        placeholder="e.g. MCA104"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="e.g. ananya@college.edu"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username (min 5 characters) *</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="e.g. ananya104"
+                        autocomplete="username"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password (min 8 characters, 1 digit) *</label>
+                    <div class="input-relative">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter secure password"
+                            autocomplete="new-password"
+                            required>
+                        <button
+                            type="button"
+                            class="toggle-password-btn"
+                            onclick="togglePassword('password')"
+                            title="Show/Hide Password">
+                            👁️
+                        </button>
+                    </div>
+                    <div class="password-hint">At least 8 characters with at least one number (0-9)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <div class="input-relative">
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            placeholder="Re-enter password"
+                            autocomplete="new-password"
+                            required>
+                        <button
+                            type="button"
+                            class="toggle-password-btn"
+                            onclick="togglePassword('confirmPassword')"
+                            title="Show/Hide Password">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="course">Default Course / Degree</label>
+                    <select id="course" name="course">
+                        <option value="MCA">MCA (Master of Computer Applications)</option>
+                        <option value="B.Tech">B.Tech (Computer Science)</option>
+                        <option value="BCA">BCA (Bachelor of Computer Applications)</option>
+                        <option value="M.Tech">M.Tech (Information Technology)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn" style="width: 100%; margin-top: 10px;">
+                    Register Account &rarr;
+                </button>
+
+            </form>
+
+            <div style="text-align: center; margin-top: 22px; font-size: 14px;">
+                <span style="color: #718096;">Already have an account?</span>
+                <a href="login.html" style="color: #667eea; text-decoration: none; font-weight: bold; margin-left: 6px;">
+                    Sign In here &rarr;
+                </a>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            Student Grade Calculator Management System
+        </div>
+
+    </div>
+
+    <script src="script.js?v=20261028-2"></script>
+    <script>
+        function togglePassword(fieldId) {
+            const input = document.getElementById(fieldId);
+            input.type = (input.type === "password") ? "text" : "password";
+        }
+
+        function showAlert(msg, isSuccess = false) {
+            const alertBox = document.getElementById("alertBox");
+            alertBox.className = "alert " + (isSuccess ? "alert-success" : "alert-error");
+            alertBox.textContent = msg;
+            alertBox.style.display = "block";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideAlert() {
+            document.getElementById("alertBox").style.display = "none";
+        }
+
+        // Phase 3 Requirement: JavaScript validation (empty fields, format checks)
+        // and represent user data format using JSON
+        async function handleRegisterSubmit(event) {
+            event.preventDefault();
+            hideAlert();
+
+            const studentName = document.getElementById("studentName").value.trim();
+            const studentId = document.getElementById("studentId").value.trim().toUpperCase();
+            const email = document.getElementById("email").value.trim();
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            // 1. Empty field checks
+            if (!studentName || !studentId || !email || !username || !password || !confirmPassword) {
+                showAlert("All fields marked with * are required.");
+                return;
+            }
+
+            // 2. Format Checks: Student ID
+            if (studentId.length < 3) {
+                showAlert("Student ID must be at least 3 characters long.");
+                return;
+            }
+
+            // 3. Format Checks: Email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showAlert("Please enter a valid email address (e.g., student@college.edu).");
+                return;
+            }
+
+            // 4. Format Checks: Username length
+            if (username.length < 5) {
+                showAlert("Username must contain at least 5 characters.");
+                return;
+            }
+
+            // 5. Format Checks: Password length and digit
+            if (password.length < 8) {
+                showAlert("Password must be at least 8 characters long.");
+                return;
+            }
+
+            if (!/\d/.test(password)) {
+                showAlert("Password must contain at least one numeric digit (0-9).");
+                return;
+            }
+
+            // 6. Password Match Check
+            if (password !== confirmPassword) {
+                showAlert("Passwords do not match. Please re-enter.");
+                return;
+            }
+
+            const formData = new URLSearchParams();
+            formData.append("username", username);
+            formData.append("password", password);
+            formData.append("confirmPassword", confirmPassword);
+            formData.append("email", email);
+            formData.append("studentId", studentId);
+            formData.append("studentName", studentName);
+            formData.append("course", document.getElementById("course").value);
+
+            let response;
+            try {
+                response = await fetch("register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: formData.toString()
+                });
+            } catch (networkError) {
+                showAlert("Unable to reach the application server. Start the Java server and try again.");
+                return;
+            }
+
+            let result;
+            try {
+                result = await response.json();
+            } catch (invalidResponse) {
+                showAlert("The server returned an invalid response. Please try again.");
+                return;
+            }
+
+            if (!response.ok || !result.success || !result.user) {
+                showAlert(result.message || "Registration failed. Check the details and try again.");
+                return;
+            }
+
+            setCurrentUser(result.user);
+            document.getElementById("submitBtn").disabled = true;
+            document.getElementById("submitBtn").textContent = "Redirecting...";
+            window.location.href = result.redirect || "dashboard.jsp";
+        }
+
+        // Check if query params contain error message from servlet
+        window.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get("error");
+            if (error) {
+                showAlert(error, false);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

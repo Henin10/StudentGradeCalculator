@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Student Grade Calculator Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- NAVBAR -->
+        <div id="navbarPlaceholder"></div>
+
+        <!-- MAIN DASHBOARD CARD -->
+        <div class="card">
+
+            <div class="card-header">
+                <h1 class="card-title">
+                    🎓 Student Grade Calculator Management System
+                </h1>
+                <p class="card-subtitle">
+                    Academic performance metrics, student records, and grade calculation portal.
+                </p>
+            </div>
+
+            <!-- STATISTICS WIDGETS -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="statTotalStudents">0</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statEvaluated" style="color: #3182ce;">0</div>
+                    <div class="stat-label">Evaluated Exams</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statPassed" style="color: #38a169;">0</div>
+                    <div class="stat-label">Students Passed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statAvgPercentage" style="color: #805ad5;">0.0%</div>
+                    <div class="stat-label">Average Performance</div>
+                </div>
+            </div>
+
+            <!-- QUICK ACTIONS -->
+            <h2 class="section-accent-title">Management Modules & Quick Actions</h2>
+
+            <div class="actions-grid">
+                <a href="student.html" class="action-tile">
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </div>
+                    <h3>Add / Manage Students</h3>
+                    <p>Register new student profiles, view enrolled records, edit information, or delete records.</p>
+                </a>
+
+                <a href="index.html" class="action-tile">
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V18z"/></svg>
+                    </div>
+                    <h3>Calculate Grades</h3>
+                    <p>Enter subject-wise marks, compute total scores, percentage, assign grades, and determine status.</p>
+                </a>
+
+                <a href="result.html" class="action-tile">
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                    </div>
+                    <h3>Academic Report Card</h3>
+                    <p>Inspect the official academic transcript with subject marks, percentage breakdown, and printable report.</p>
+                </a>
+            </div>
+
+            <!-- RECENT EVALUATIONS TABLE -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h2 class="section-accent-title" style="margin-bottom: 0;">Recent Grade Evaluations</h2>
+                <a href="index.html" class="btn btn-primary btn-sm">+ New Evaluation</a>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <th>Course</th>
+                            <th>Total Marks</th>
+                            <th>Percentage</th>
+                            <th>Grade</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="evaluationsTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            Student Grade Calculator Management System • Built with Java & Modern Web Technologies
+        </div>
+
+    </div>
+
+    <script src="script.js?v=20261028-2"></script>
+    <script>
+        // Check authentication
+        requireAuth();
+        renderNavbar('dashboard');
+
+        // Load stats and recent records
+        function loadDashboardData() {
+            const stats = getSystemStats();
+            document.getElementById("statTotalStudents").textContent = stats.totalStudents;
+            document.getElementById("statEvaluated").textContent = stats.totalEvaluations;
+            document.getElementById("statPassed").textContent = stats.passCount;
+            document.getElementById("statAvgPercentage").textContent = stats.avgPercentage + "%";
+
+            const evaluations = getAllEvaluations();
+            const tbody = document.getElementById("evaluationsTableBody");
+
+            if (evaluations.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: #888; padding: 24px;">
+                            No evaluations calculated yet. Click "+ New Evaluation" to grade students!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = evaluations.map(ev => `
+                <tr>
+                    <td><strong>${ev.studentId}</strong></td>
+                    <td>${ev.studentName}</td>
+                    <td>${ev.course} (Sem ${ev.semester})</td>
+                    <td>${ev.totalMarks} / ${ev.maxMarks}</td>
+                    <td><strong>${ev.percentage.toFixed(2)}%</strong></td>
+                    <td><span class="badge badge-grade">${ev.grade}</span></td>
+                    <td><span class="badge ${ev.status === 'PASS' ? 'badge-pass' : 'badge-fail'}">${ev.status}</span></td>
+                    <td>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="viewStudentResult('${ev.studentId}')">
+                            View Result
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function viewStudentResult(studentId) {
+            const ev = getAllEvaluations().find(e => e.studentId.trim().toUpperCase() === studentId.trim().toUpperCase());
+            if (ev) {
+                sessionStorage.setItem("gradeCalc_latestResult", JSON.stringify(ev));
+                window.location.href = "result.html";
+            }
+        }
+
+        loadDashboardData();
+    </script>
+
+</body>
+
+</html>

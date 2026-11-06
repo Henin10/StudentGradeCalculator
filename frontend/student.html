@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management - Student Grade Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- NAVBAR -->
+        <div id="navbarPlaceholder"></div>
+
+        <!-- REGISTRATION / EDIT CARD -->
+        <div class="card">
+
+            <div class="card-header">
+                <h1 class="card-title" id="formCardTitle">
+                    👤 Student Registration & Record Management
+                </h1>
+                <p class="card-subtitle">
+                    Enroll new students, search existing records, modify academic data, or delete student profiles.
+                </p>
+            </div>
+
+            <!-- FEEDBACK ALERT -->
+            <div id="alertBox" class="alert"></div>
+
+            <!-- STUDENT FORM -->
+            <form id="studentForm" onsubmit="handleFormSubmit(event)">
+
+                <input type="hidden" id="isEditMode" value="false">
+                <input type="hidden" id="originalStudentId" value="">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="studentId">Student ID *</label>
+                        <input
+                            type="text"
+                            id="studentId"
+                            placeholder="e.g. MCA104"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentName">Student Name *</label>
+                        <input
+                            type="text"
+                            id="studentName"
+                            placeholder="e.g. Ananya Patel"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="course">Course / Degree *</label>
+                        <input
+                            type="text"
+                            id="course"
+                            placeholder="e.g. MCA, B.Tech, M.Tech"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="semester">Semester (1 to 8) *</label>
+                        <select id="semester" required>
+                            <option value="">Select Semester</option>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                            <option value="7">Semester 7</option>
+                            <option value="8">Semester 8</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="btn-row">
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                        Save Student Record
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetStudentForm()">
+                        Clear Form
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- RECORDS TABLE CARD -->
+        <div class="card" id="records">
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+                <h2 class="section-accent-title" style="margin-bottom: 0;">Enrolled Student Records</h2>
+                <span style="font-size: 14px; color: #718096;" id="recordCountLabel">Total Students: 0</span>
+            </div>
+
+            <!-- SEARCH BAR -->
+            <div class="search-bar-wrapper">
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="search-input"
+                    placeholder="🔍 Search student by ID, Name, or Course..."
+                    oninput="handleSearch()">
+                <button type="button" class="btn btn-secondary" onclick="handleSearch()">
+                    Search
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="clearSearch()">
+                    Reset Search
+                </button>
+            </div>
+
+            <!-- TABLE OF STUDENTS -->
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <th>Course</th>
+                            <th>Semester</th>
+                            <th style="text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            Student Grade Calculator Management System
+        </div>
+
+    </div>
+
+    <script src="script.js?v=20261028-2"></script>
+    <script>
+        requireAuth();
+        renderNavbar('student');
+
+        function showAlert(msg, isSuccess = false) {
+            const alertBox = document.getElementById("alertBox");
+            alertBox.className = "alert " + (isSuccess ? "alert-success" : "alert-error");
+            alertBox.textContent = msg;
+            alertBox.style.display = "block";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideAlert() {
+            document.getElementById("alertBox").style.display = "none";
+        }
+
+        function renderTable(students) {
+            const tbody = document.getElementById("studentsTableBody");
+            document.getElementById("recordCountLabel").textContent = `Total Students: ${students.length}`;
+
+            if (students.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #888; padding: 24px;">
+                            No matching student records found.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = students.map(s => `
+                <tr>
+                    <td><strong>${s.studentId}</strong></td>
+                    <td>${s.studentName}</td>
+                    <td>${s.course}</td>
+                    <td>Semester ${s.semester}</td>
+                    <td style="text-align: center;">
+                        <div class="btn-row" style="justify-content: center;">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="gradeStudent('${s.studentId}')">
+                                📊 Calculate Marks
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="editStudent('${s.studentId}')">
+                                ✏️ Edit
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeStudent('${s.studentId}')">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadAllRecords() {
+            try {
+                const students = await syncRegisteredStudents();
+                const query = document.getElementById("searchInput").value;
+                renderTable(query ? searchStudents(query) : students);
+            } catch (error) {
+                renderTable(getAllStudents());
+                showAlert(`${error.message} Showing records saved in this browser.`, false);
+            }
+        }
+
+        function handleSearch() {
+            const query = document.getElementById("searchInput").value;
+            const filtered = searchStudents(query);
+            renderTable(filtered);
+        }
+
+        function clearSearch() {
+            document.getElementById("searchInput").value = "";
+            loadAllRecords();
+            window.addEventListener("focus", loadAllRecords);
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "visible") {
+                    loadAllRecords();
+                }
+            });
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            hideAlert();
+
+            const isEdit = document.getElementById("isEditMode").value === "true";
+            const originalId = document.getElementById("originalStudentId").value;
+
+            const studentId = document.getElementById("studentId").value.trim();
+            const studentName = document.getElementById("studentName").value.trim();
+            const course = document.getElementById("course").value.trim();
+            const semester = document.getElementById("semester").value;
+
+            try {
+                if (isEdit) {
+                    updateStudent(originalId, { studentName, course, semester });
+                    showAlert(`Student '${studentId}' updated successfully!`, true);
+                } else {
+                    addStudent({ studentId, studentName, course, semester });
+                    showAlert(`Student '${studentId}' registered successfully!`, true);
+                }
+
+                resetStudentForm();
+                loadAllRecords();
+
+            } catch (err) {
+                showAlert(err.message, false);
+            }
+        }
+
+        function editStudent(studentId) {
+            const s = getStudentById(studentId);
+            if (!s) return;
+
+            document.getElementById("isEditMode").value = "true";
+            document.getElementById("originalStudentId").value = s.studentId;
+
+            document.getElementById("studentId").value = s.studentId;
+            document.getElementById("studentId").disabled = true; // Lock ID during update
+            document.getElementById("studentName").value = s.studentName;
+            document.getElementById("course").value = s.course;
+            document.getElementById("semester").value = s.semester;
+
+            document.getElementById("saveBtn").textContent = "Update Student Record";
+            document.getElementById("formCardTitle").textContent = `✏️ Edit Student: ${s.studentName} (${s.studentId})`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function removeStudent(studentId) {
+            if (confirm(`Are you sure you want to delete student ${studentId}? This will also delete any evaluation records.`)) {
+                try {
+                    deleteStudent(studentId);
+                    showAlert(`Student '${studentId}' deleted successfully.`, true);
+                    loadAllRecords();
+                } catch(err) {
+                    showAlert(err.message, false);
+                }
+            }
+        }
+
+        function gradeStudent(studentId) {
+            const s = getStudentById(studentId);
+            if (s) {
+                sessionStorage.setItem("gradeCalc_selectedStudent", JSON.stringify(s));
+                window.location.href = "index.html";
+            }
+        }
+
+        function resetStudentForm() {
+            document.getElementById("studentForm").reset();
+            document.getElementById("isEditMode").value = "false";
+            document.getElementById("originalStudentId").value = "";
+            document.getElementById("studentId").disabled = false;
+            document.getElementById("saveBtn").textContent = "Save Student Record";
+            document.getElementById("formCardTitle").textContent = "👤 Student Registration & Record Management";
+            hideAlert();
+        }
+
+        loadAllRecords();
+    </script>
+
+</body>
+
+</html>

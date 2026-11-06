@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Calculator - Student Grade Calculator Management System</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .marks-table {
+            width: 100%;
+            min-width: 0;
+            table-layout: fixed;
+        }
+
+        .marks-table th,
+        .marks-table td {
+            overflow-wrap: anywhere;
+        }
+
+        .marks-table input {
+            width: 100%;
+            min-width: 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        @media (max-width: 760px) {
+            .marks-table {
+                min-width: 0;
+                table-layout: fixed;
+            }
+
+            .marks-table th,
+            .marks-table td {
+                padding: 8px 6px;
+                overflow-wrap: anywhere;
+            }
+
+            .marks-table input {
+                min-width: 0;
+                width: 100%;
+                padding: 8px 4px;
+            }
+        }
+
+        .result-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .summary-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .summary-card h4 {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .summary-card p {
+            font-size: 24px;
+            font-weight: 800;
+            color: #2d3748;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- NAVBAR -->
+        <div id="navbarPlaceholder"></div>
+
+        <!-- MAIN CALCULATOR CARD -->
+        <div class="card">
+
+            <div class="card-header">
+                <h1 class="card-title">
+                    📊 Student Academic Grade Calculator
+                </h1>
+                <p class="card-subtitle">
+                    Select an enrolled student, enter subject-wise marks, and calculate aggregate results.
+                </p>
+            </div>
+
+            <!-- ALERT MESSAGE -->
+            <div id="alertBox" class="alert"></div>
+
+            <!-- STUDENT SELECTION / DETAILS -->
+            <h2 class="section-accent-title">Step 1: Student Information</h2>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="studentSelect">Select Registered Student *</label>
+                    <select id="studentSelect" onchange="onStudentSelectChange()">
+                        <option value="">-- Choose Student --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="studentId">Student ID</label>
+                    <input type="text" id="studentId" placeholder="Student ID" readonly style="background: #f7fafc;">
+                </div>
+
+                <div class="form-group">
+                    <label for="studentName">Student Name</label>
+                    <input type="text" id="studentName" placeholder="Student Name" readonly style="background: #f7fafc;">
+                </div>
+
+                <div class="form-group">
+                    <label for="courseInfo">Course & Semester</label>
+                    <input type="text" id="courseInfo" placeholder="Course & Semester" readonly style="background: #f7fafc;">
+                </div>
+
+            </div>
+
+            <!-- MARKS ENTRY TABLE -->
+            <h2 class="section-accent-title" style="margin-top: 10px;">Step 2: Subject Marks Entry</h2>
+
+            <div class="table-responsive">
+                <table class="marks-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 42%;">Subject Name</th>
+                            <th style="width: 23%; text-align: center;">Maximum Marks</th>
+                            <th style="width: 35%; text-align: center;">Marks Obtained (0 - 100)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Java Programming</strong></td>
+                            <td style="text-align: center;">100</td>
+                            <td>
+                                <input type="number" id="java" min="0" max="100" placeholder="0 - 100" required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Structures</strong></td>
+                            <td style="text-align: center;">100</td>
+                            <td>
+                                <input type="number" id="dataStructures" min="0" max="100" placeholder="0 - 100" required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Database Management</strong></td>
+                            <td style="text-align: center;">100</td>
+                            <td>
+                                <input type="number" id="database" min="0" max="100" placeholder="0 - 100" required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Computer Networks</strong></td>
+                            <td style="text-align: center;">100</td>
+                            <td>
+                                <input type="number" id="networks" min="0" max="100" placeholder="0 - 100" required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Web Technology</strong></td>
+                            <td style="text-align: center;">100</td>
+                            <td>
+                                <input type="number" id="webTechnology" min="0" max="100" placeholder="0 - 100" required>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="btn-row" style="margin: 24px 0;">
+                <button type="button" class="btn btn-primary" onclick="calculateAndSaveGrade()">
+                    ⚡ Calculate Grade
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                    🔄 Reset Form
+                </button>
+                <a href="result.html" class="btn btn-success" id="viewReportBtn" style="display: none;">
+                    📄 View Official Report Card &rarr;
+                </a>
+            </div>
+
+            <!-- CALCULATION RESULT PREVIEW -->
+            <div id="resultSection" style="display: none; border-top: 2px dashed #e2e8f0; padding-top: 20px; margin-top: 20px;">
+                <h2 class="section-accent-title">Calculation Summary</h2>
+
+                <div class="result-summary-grid">
+                    <div class="summary-card">
+                        <h4>Total Marks</h4>
+                        <p id="totalDisplay">0 / 500</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Percentage</h4>
+                        <p id="percentageDisplay" style="color: #667eea;">0%</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Assigned Grade</h4>
+                        <p id="gradeDisplay">-</p>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Academic Status</h4>
+                        <p id="statusDisplay">-</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            Student Grade Calculator Management System
+        </div>
+
+    </div>
+
+    <script src="script.js?v=20261028-4"></script>
+    <script>
+        requireAuth();
+        renderNavbar('calculator');
+
+        let currentStudent = null;
+
+        async function refreshStudentDropdown() {
+            const select = document.getElementById("studentSelect");
+            const selectedId = select.value;
+            let students;
+            try {
+                students = await syncRegisteredStudents();
+            } catch (error) {
+                showAlert(`${error.message} Showing records saved in this browser.`);
+                students = getAllStudents();
+            }
+
+            select.innerHTML = '<option value="">-- Choose Registered Student --</option>';
+            students.forEach(s => {
+                select.innerHTML += `<option value="${s.studentId}">${s.studentName} (${s.studentId})</option>`;
+            });
+
+            if (selectedId && students.some(student => student.studentId === selectedId)) {
+                select.value = selectedId;
+                return;
+            }
+
+            const preselectedRaw = sessionStorage.getItem("gradeCalc_selectedStudent");
+            if (preselectedRaw) {
+                try {
+                    const preselectedStudent = JSON.parse(preselectedRaw);
+                    select.value = preselectedStudent.studentId;
+                    sessionStorage.removeItem("gradeCalc_selectedStudent");
+                } catch (error) {
+                    sessionStorage.removeItem("gradeCalc_selectedStudent");
+                }
+            }
+            if (students.length > 0) {
+                select.value = select.value || students[0].studentId;
+            }
+            onStudentSelectChange();
+        }
+
+        function onStudentSelectChange() {
+            const selectedId = document.getElementById("studentSelect").value;
+            if (!selectedId) {
+                currentStudent = null;
+                document.getElementById("studentId").value = "";
+                document.getElementById("studentName").value = "";
+                document.getElementById("courseInfo").value = "";
+                return;
+            }
+
+            currentStudent = getStudentById(selectedId);
+            if (currentStudent) {
+                document.getElementById("studentId").value = currentStudent.studentId;
+                document.getElementById("studentName").value = currentStudent.studentName;
+                document.getElementById("courseInfo").value = `${currentStudent.course} (Semester ${currentStudent.semester})`;
+
+                // Pre-fill existing marks if already evaluated
+                const existingEval = getAllEvaluations().find(e => e.studentId.trim().toUpperCase() === currentStudent.studentId.trim().toUpperCase());
+                if (existingEval && existingEval.marks) {
+                    document.getElementById("java").value = existingEval.marks["Java Programming"] || "";
+                    document.getElementById("dataStructures").value = existingEval.marks["Data Structures"] || "";
+                    document.getElementById("database").value = existingEval.marks["Database Management"] || "";
+                    document.getElementById("networks").value = existingEval.marks["Computer Networks"] || "";
+                    document.getElementById("webTechnology").value = existingEval.marks["Web Technology"] || "";
+                }
+            }
+        }
+
+        function showAlert(msg, isSuccess = false) {
+            const alertBox = document.getElementById("alertBox");
+            alertBox.className = "alert " + (isSuccess ? "alert-success" : "alert-error");
+            alertBox.textContent = msg;
+            alertBox.style.display = "block";
+            alertBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function hideAlert() {
+            document.getElementById("alertBox").style.display = "none";
+        }
+
+        function calculateAndSaveGrade() {
+            hideAlert();
+
+            if (!currentStudent) {
+                showAlert("Please select a registered student first.");
+                return;
+            }
+
+            const javaVal = document.getElementById("java").value;
+            const dsVal = document.getElementById("dataStructures").value;
+            const dbVal = document.getElementById("database").value;
+            const netVal = document.getElementById("networks").value;
+            const wtVal = document.getElementById("webTechnology").value;
+
+            if (javaVal === "" || dsVal === "" || dbVal === "" || netVal === "" || wtVal === "") {
+                showAlert("Please enter marks for all 5 subjects.");
+                return;
+            }
+
+            const marks = {
+                "Java Programming": Number(javaVal),
+                "Data Structures": Number(dsVal),
+                "Database Management": Number(dbVal),
+                "Computer Networks": Number(netVal),
+                "Web Technology": Number(wtVal)
+            };
+
+            // Range validation
+            for (const sub in marks) {
+                const mark = marks[sub];
+                if (isNaN(mark) || mark < 0 || mark > 100) {
+                    showAlert(`Invalid marks for ${sub}! Marks must be between 0 and 100.`);
+                    return;
+                }
+            }
+
+            // Calculations
+            let total = 0;
+            for (const sub in marks) {
+                total += marks[sub];
+            }
+
+            const maxMarks = 500;
+            const percentage = (total / maxMarks) * 100;
+            const grade = getGradeForPercentage(percentage);
+            const status = determinePassFail(marks, percentage);
+
+            // Save to persistent storage
+            const evaluationRecord = {
+                studentId: currentStudent.studentId,
+                studentName: currentStudent.studentName,
+                course: currentStudent.course,
+                semester: currentStudent.semester,
+                marks: marks,
+                totalMarks: total,
+                maxMarks: maxMarks,
+                percentage: percentage,
+                grade: grade,
+                status: status,
+                date: new Date().toLocaleDateString()
+            };
+
+            try {
+                saveEvaluation(evaluationRecord);
+            } catch (error) {
+                showAlert(`Unable to save this result in the browser: ${error.message}`);
+                return;
+            }
+
+            // Display summary on screen
+            document.getElementById("totalDisplay").textContent = `${total.toFixed(2)} / ${maxMarks}`;
+            document.getElementById("percentageDisplay").textContent = `${percentage.toFixed(2)}%`;
+            document.getElementById("gradeDisplay").textContent = grade;
+
+            const statusEl = document.getElementById("statusDisplay");
+            statusEl.textContent = status;
+            statusEl.style.color = (status === "PASS") ? "#38a169" : "#e53e3e";
+
+            document.getElementById("resultSection").style.display = "block";
+            document.getElementById("viewReportBtn").style.display = "inline-flex";
+
+            showAlert(`Result calculated and saved successfully for ${currentStudent.studentName}!`, true);
+            document.getElementById("resultSection").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function resetForm() {
+            document.getElementById("java").value = "";
+            document.getElementById("dataStructures").value = "";
+            document.getElementById("database").value = "";
+            document.getElementById("networks").value = "";
+            document.getElementById("webTechnology").value = "";
+            document.getElementById("resultSection").style.display = "none";
+            document.getElementById("viewReportBtn").style.display = "none";
+            hideAlert();
+        }
+
+        refreshStudentDropdown();
+        window.addEventListener("focus", refreshStudentDropdown);
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                refreshStudentDropdown();
+            }
+        });
+    </script>
+
+</body>
+
+</html>
